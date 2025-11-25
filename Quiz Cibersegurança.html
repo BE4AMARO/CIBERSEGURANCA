@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<!-- saved from url=(0045)file:///C:/meu-site-ciberseguranca/index.html -->
+<html lang="pt-BR"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quiz Cibersegurança</title>
+<style>
+body { background:black; color:#00ffea; font-family:monospace; text-align:center; padding:20px; }
+button { background:#00ffea; color:black; padding:10px 20px; margin:5px; font-weight:bold; cursor:pointer; border:none; border-radius:5px; }
+button:hover { background:#00cfc5; }
+#resultado { margin-top:20px; font-weight:bold; font-size:18px; }
+#ranking { margin-top:30px; text-align:left; border:2px solid #00ffea; padding:10px; border-radius:10px; max-width:600px; margin-left:auto; margin-right:auto; }
+#ranking h3 { text-align:center; }
+input { padding:8px; margin-top:5px; width:80%; border-radius:5px; border:2px solid #00ffea; background:black; color:#00ffea; }
+</style>
+<style type="text/css" id="operaUserStyle"></style></head>
+<body>
+
+<h1>Quiz de Cibersegurança</h1>
+<h2 id="pergunta"></h2>
+<div id="opcoes"></div>
+<div id="resultado"></div>
+
+<div id="formulario">
+<h3>Registrar Nome e Idade</h3>
+<input type="text" id="nome" placeholder="Seu nome"><br><br>
+<input type="number" id="idade" placeholder="Sua idade"><br><br>
+<button id="btnRegistrar">Registrar no ranking</button>
+</div>
+
+<div id="ranking">
+<h3>🏆 Ranking dos Participantes</h3>
+<div id="rankingLista"></div>
+</div>
+
+<script>
+// Perguntas
+const perguntas = [
+  {p:"O que é phishing?", op:["Golpe com links falsos","Antivírus","Backup"], correta:0},
+  {p:"O que é ransomware?", op:["Criptografa arquivos","Protege PC","Limpa vírus"], correta:0},
+  {p:"Qual senha é mais segura?", op:["123456","Senha123","T4!k9@Lp%"], correta:2},
+  {p:"O que é malware?", op:["Software malicioso","Rede Wi-Fi","Backup"], correta:0}
+];
+
+let perguntaAtual = perguntas[Math.floor(Math.random()*perguntas.length)];
+document.getElementById('pergunta').innerText = perguntaAtual.p;
+
+let respostaSelecionada = null; // GUARDA SE FOI ACERTO OU ERRO
+
+// Cria opções
+const opcoesDiv = document.getElementById('opcoes');
+perguntaAtual.op.forEach((o,i)=>{
+  const btn = document.createElement('button');
+  btn.innerText = o;
+  btn.onclick = ()=>{
+    respostaSelecionada = (i === perguntaAtual.correta);
+    document.getElementById('resultado').innerText = respostaSelecionada ?
+      "🎉 Parabéns, você acertou!" :
+      "❌ Errou! Resposta correta: " + perguntaAtual.op[perguntaAtual.correta];
+    
+    // Desabilita botões após clicar
+    const botoes = document.querySelectorAll('#opcoes button');
+    botoes.forEach(b=>b.disabled=true);
+  };
+  opcoesDiv.appendChild(btn);
+});
+
+// ===== REGISTRO DE PARTICIPANTES =====
+document.getElementById('btnRegistrar').onclick = ()=>{
+  const nome = document.getElementById('nome').value.trim();
+  const idade = document.getElementById('idade').value.trim();
+  if(!nome || !idade){
+    alert("Preencha nome e idade!");
+    return;
+  }
+  
+  if(respostaSelecionada === null){
+    alert("Responda a pergunta primeiro!");
+    return;
+  }
+
+  let registros = JSON.parse(localStorage.getItem('ranking')||'[]');
+  registros.push({
+    nome: nome,
+    idade: idade,
+    pergunta: perguntaAtual.p,
+    acertou: respostaSelecionada
+  });
+  localStorage.setItem('ranking', JSON.stringify(registros));
+  atualizarRanking();
+  alert("Registrado no ranking!");
+};
+
+// Atualiza ranking na tela
+function atualizarRanking(){
+  const rankingDiv = document.getElementById('rankingLista');
+  let registros = JSON.parse(localStorage.getItem('ranking')||'[]');
+  let html='';
+  registros.forEach(r=>{
+    html += <p><b>${r.nome}</b> (${r.idade} anos) - "${r.pergunta}" - ${r.acertou?"✅ Acertou":"❌ Errou"}</p>;
+  });
+  rankingDiv.innerHTML = html;
+}
+
+// Inicializa ranking
+atualizarRanking();
+</script>
+
+
+</body></html>
