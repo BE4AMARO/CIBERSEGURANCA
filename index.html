@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CONECTADOS E SEGUROS</title>
+<style>
+body { margin:0; font-family: monospace; color:#00ffea; background:black; text-align:center; overflow-x:hidden;}
+canvas { position:fixed; top:0; left:0; width:100%; height:100%; z-index:-1;}
+.container { padding:20px; }
+.caixa {
+  background: rgba(0,0,0,0.7);
+  border: 2px solid #00ffea;
+  padding:20px; margin-top:20px;
+  border-radius:10px;
+  box-shadow:0 0 20px #00ffea;
+}
+button {
+  background:#00ffea; color:black; border:none;
+  padding:12px 20px; font-size:16px; margin:5px;
+  border-radius:8px; cursor:pointer; font-weight:bold;
+}
+button:hover { background:#00cfc5; box-shadow:0 0 12px #00ffea; }
+h1,h2,h3 { text-shadow:0 0 10px #00eaff,0 0 20px #00eaff; }
+#resultado { margin-top:15px; font-weight:bold; font-size:18px; }
+
+/* Tabela */
+table { width:100%; border-collapse:collapse; color:#00ffea; margin-top:10px; }
+th,td { border:1px solid #00ffea; padding:8px; }
+tr:nth-child(even){background:rgba(0,255,255,0.1);}
+</style>
+</head>
+<body>
+
+<canvas id="matrix"></canvas>
+
+<div class="container">
+<h1>CONECTADOS E SEGUROS</h1>
+
+<!-- DICAS -->
+<div class="caixa">
+<h2>Dicas de Segurança Cibernética</h2>
+<p>🔐 Use senhas fortes e únicas</p>
+<p>⚠️ Cuidado com links suspeitos</p>
+<p>🛡️ Ative autenticação de dois fatores (2FA)</p>
+<p>💻 Não compartilhe dados pessoais</p>
+</div>
+
+<!-- PERGUNTA -->
+<div class="caixa">
+<h2>Pergunta</h2>
+<h3 id="pergunta"></h3>
+<div id="opcoes"></div>
+<div id="resultado"></div>
+</div>
+
+<!-- FORM DE REGISTRO -->
+<div class="caixa" id="formBox" style="display:none;">
+<h2>Registrar Participante</h2>
+<input id="nome" placeholder="Seu nome" style="padding:8px; width:80%;"><br><br>
+<input id="idade" placeholder="Idade" type="number" style="padding:8px; width:80%;"><br><br>
+<button onclick="registrar()">Registrar</button>
+</div>
+
+<!-- TABELA -->
+<div class="caixa">
+<h2>Participantes Registrados</h2>
+<table id="tabela">
+<tr><th>Nome</th><th>Idade</th><th>Resultado</th><th>Pergunta</th></tr>
+</table>
+<button onclick="limpar()">Limpar Registros</button>
+</div>
+
+<!-- EQUIPE -->
+<div class="caixa">
+<h2>Equipe do Projeto</h2>
+<p>Ana Luiza Vieira Freitas</p>
+<p>Beatriz Rodrigues Amaro</p>
+<p>Gabriela Costa de Souza</p>
+<p>João Evangelista China Serafim</p>
+</div>
+
+</div>
+
+<script>
+// ===== MATRIX =====
+const canvas=document.getElementById('matrix'),ctx=canvas.getContext('2d');
+canvas.width=window.innerWidth; canvas.height=window.innerHeight;
+const letras="01",tamanho=18,colunas=Math.floor(canvas.width/tamanho);
+const gotas=Array.from({length:colunas},()=>1);
+function matrix(){
+  ctx.fillStyle="rgba(0,0,0,0.05)";
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.fillStyle="#00ffea";
+  ctx.font=tamanho+"px monospace";
+  for(let i=0;i<gotas.length;i++){
+    ctx.fillText(letras[Math.floor(Math.random()*2)],i*tamanho,gotas[i]*tamanho);
+    if(gotas[i]*tamanho>canvas.height&&Math.random()>0.95)gotas[i]=0;
+    gotas[i]++;
+  }
+}
+setInterval(matrix,40);
+
+// ===== PERGUNTAS =====
+const perguntas=[
+  {p:"O que é phishing?",op:["Golpe com links falsos","Antivírus","Backup"],correta:0},
+  {p:"O que é ransomware?",op:["Criptografa arquivos","Protege PC","Limpa vírus"],correta:0},
+  {p:"Qual senha é mais segura?",op:["123456","Senha123","T4!k9@Lp%"],correta:2},
+  {p:"O que é malware?",op:["Software malicioso","Rede Wi-Fi","Backup"],correta:0}
+];
+
+let atual=perguntas[Math.floor(Math.random()*perguntas.length)];
+let acertou=null;
+
+document.getElementById("pergunta").innerText=atual.p;
+
+const opDiv=document.getElementById("opcoes");
+
+atual.op.forEach((o,i)=>{
+  const btn=document.createElement("button");
+  btn.innerText=o;
+  btn.onclick=()=>{
+    acertou=(i===atual.correta);
+    document.getElementById('resultado').innerText=
+      acertou?"🎉 Acertou!":"❌ Errou! Resposta correta: "+atual.op[atual.correta];
+    document.querySelectorAll("#opcoes button").forEach(b=>b.disabled=true);
+    document.getElementById("formBox").style.display="block";
+  };
+  opDiv.appendChild(btn);
+});
+
+// ===== REGISTRO =====
+function registrar(){
+  let nome=document.getElementById("nome").value.trim();
+  let idade=document.getElementById("idade").value.trim();
+  if(!nome||!idade){ alert("Preencha nome e idade"); return; }
+
+  const dado={
+    nome:nome,
+    idade:idade,
+    resultado:acertou?"Acertou":"Errou",
+    pergunta:atual.p
+  };
+
+  let lista=JSON.parse(localStorage.getItem("participantes")||"[]");
+  lista.push(dado);
+  localStorage.setItem("participantes",JSON.stringify(lista));
+
+  atualizarTabela();
+  alert("Registrado!");
+}
+
+function atualizarTabela(){
+  let tabela=document.getElementById("tabela");
+  tabela.innerHTML="<tr><th>Nome</th><th>Idade</th><th>Resultado</th><th>Pergunta</th></tr>";
+
+  let lista=JSON.parse(localStorage.getItem("participantes")||"[]");
+  lista.forEach(p=>{
+    tabela.innerHTML += `<tr>
+      <td>${p.nome}</td>
+      <td>${p.idade}</td>
+      <td>${p.resultado}</td>
+      <td>${p.pergunta}</td>
+    </tr>`;
+  });
+}
+
+function limpar(){
+  localStorage.removeItem("participantes");
+  atualizarTabela();
+}
+
+atualizarTabela();
+</script>
+
+</body>
+</html>
