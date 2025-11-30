@@ -68,7 +68,6 @@ tr:nth-child(even){background:rgba(0,255,255,0.1);}
 <table id="tabela">
 <tr><th>Nome</th><th>Idade</th><th>Resultado</th><th>Pergunta</th></tr>
 </table>
-<button onclick="limpar()">Limpar Registros</button>
 </div>
 
 <!-- EQUIPE -->
@@ -129,33 +128,37 @@ atual.op.forEach((o,i)=>{
   opDiv.appendChild(btn);
 });
 
-// ===== REGISTRO =====
-function registrar(){
-  let nome=document.getElementById("nome").value.trim();
-  let idade=document.getElementById("idade").value.trim();
-  if(!nome||!idade){ alert("Preencha nome e idade"); return; }
+// ===== LISTA FIXA DE PARTICIPANTES (SEU REGISTRO OFICIAL) =====
+const participantesFixos = [
+  {nome:"Ana Paula", idade:27, resultado:"Acertou", pergunta:"Qual é a senha mais segura?"},
+  {nome:"André Afonso Filho", idade:25, resultado:"Acertou", pergunta:"O que é malware?"},
+  {nome:"Beatriz Santos", idade:18, resultado:"Errou", pergunta:"O que é malware?"},
+  {nome:"Beatriz", idade:23, resultado:"Acertou", pergunta:"O que é malware?"},
+  {nome:"Cesar Machado", idade:28, resultado:"Acertou", pergunta:"O que é ransomware?"},
+  {nome:"Elavnia Melo", idade:37, resultado:"Acertou", pergunta:"Qual senha é a mais segura?"},
+  {nome:"Fernanda", idade:27, resultado:"Errou", pergunta:"O que é malware?"},
+  {nome:"Fabricio", idade:24, resultado:"Acertou", pergunta:"Qual é a senha mais segura?"},
+  {nome:"Gabriel Oliveira", idade:22, resultado:"Acertou", pergunta:"Qual é a senha mais segura?"},
+  {nome:"Gustavo De Souza", idade:24, resultado:"Errou", pergunta:"O que é malware?"},
+  {nome:"Helena Maria", idade:19, resultado:"Acertou", pergunta:"Qual é a senha mais segura?"},
+  {nome:"Isabely Dias", idade:17, resultado:"Acertou", pergunta:"O que é ransomware?"},
+  {nome:"João Pedro", idade:21, resultado:"Acertou", pergunta:"Qual é a senha mais segura?"},
+  {nome:"Julia Rodrigues", idade:25, resultado:"Errou", pergunta:"O que é ransomware?"},
+  {nome:"Juliana", idade:26, resultado:"Acertou", pergunta:"O que é phishing?"},
+  {nome:"Lucas Gabriel", idade:23, resultado:"Acertou", pergunta:"O que é malware?"},
+  {nome:"Leticia Dantas", idade:20, resultado:"Errou", pergunta:"O que é phishing?"},
+  {nome:"Pedro Henrique", idade:23, resultado:"Acertou", pergunta:"Qual é a senha mais segura?"},
+  {nome:"Taissa", idade:20, resultado:"Acertou", pergunta:"O que é ransomware?"},
+  {nome:"Thamyres Araújo", idade:22, resultado:"Acertou", pergunta:"Qual é a senha mais segura?"},
+  {nome:"Yasmin Pereira", idade:26, resultado:"Acertou", pergunta:"O que é malware?"}
+];
 
-  const dado={
-    nome:nome,
-    idade:idade,
-    resultado:acertou?"Acertou":"Errou",
-    pergunta:atual.p
-  };
-
-  let lista=JSON.parse(localStorage.getItem("participantes")||"[]");
-  lista.push(dado);
-  localStorage.setItem("participantes",JSON.stringify(lista));
-
-  atualizarTabela();
-  alert("Registrado!");
-}
-
+// ===== TABELA =====
 function atualizarTabela(){
   let tabela=document.getElementById("tabela");
   tabela.innerHTML="<tr><th>Nome</th><th>Idade</th><th>Resultado</th><th>Pergunta</th></tr>";
 
-  let lista=JSON.parse(localStorage.getItem("participantes")||"[]");
-  lista.forEach(p=>{
+  participantesFixos.forEach(p=>{
     tabela.innerHTML += `<tr>
       <td>${p.nome}</td>
       <td>${p.idade}</td>
@@ -163,11 +166,6 @@ function atualizarTabela(){
       <td>${p.pergunta}</td>
     </tr>`;
   });
-}
-
-function limpar(){
-  localStorage.removeItem("participantes");
-  atualizarTabela();
 }
 
 atualizarTabela();
